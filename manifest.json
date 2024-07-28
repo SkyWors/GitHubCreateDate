@@ -11,9 +11,7 @@
 	"description": "Display github repositories creation date",
 
 	"permissions": [
-		"tabs",
-		"activeTab",
-		"scripting"
+		"storage"
 	],
 
 	"content_scripts": [
@@ -21,6 +19,11 @@
 			"matches": ["*://*/*"],
 			"js": ["background.js"]
 		}
+	],
+
+	"host_permissions": [
+		"http://github.com/*",
+		"https://github.com/*"
 	],
 
 	"icons": {
