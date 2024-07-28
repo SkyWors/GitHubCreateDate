@@ -4,15 +4,15 @@ const iconCreate = '<svg class="octicon octicon-book mr-2" width="16" height="16
 
 const iconUpdate = '<svg class="octicon octicon-book mr-2" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C14.7486 4 17.1749 5.38626 18.6156 7.5H16V9.5H22V3.5H20V5.99936C18.1762 3.57166 15.2724 2 12 2C6.47715 2 2 6.47715 2 12H4C4 7.58172 7.58172 4 12 4ZM20 12C20 16.4183 16.4183 20 12 20C9.25144 20 6.82508 18.6137 5.38443 16.5H8V14.5H2V20.5H4V18.0006C5.82381 20.4283 8.72764 22 12 22C17.5228 22 22 17.5228 22 12H20Z"></path></svg>'
 
-function createElement(date, icon, title) {
+function createElement(label, icon, title) {
 	const text = document.createElement("a");
 	text.className = "Link Link--muted";
-	text.style = "cursor: default;";
+	text.style.cursor = "default";
 	text.title = title;
 
 	text.innerHTML = `
 						${icon}
-						<span class="color-fg-muted">${new Date(date).toLocaleString()}</span>
+						<span class="color-fg-muted">${label}</span>
 					`;
 
 	const element = document.createElement("div");
@@ -41,13 +41,16 @@ function createElement(date, icon, title) {
 	const api = await fetch(`https://api.github.com/repos/${user}/${repo}`)
 		.then(response => response.json());
 
+	const parentNode = lastChild.parentNode;
+
 	if (api.message) {
+		if (api.message.startsWith("API rate limit")) {
+			parentNode.insertBefore(createElement("Rate limit", iconCreate, "Creation date"), lastChild.textContent.trim() === "Report repository" ? lastChild.previousSibling : lastChild.nextSibling);
+		}
 		return;
 	}
 
-	const parentNode = lastChild.parentNode;
-
-	parentNode.insertBefore(createElement(api.created_at, iconCreate, "Creation date"), lastChild.textContent.trim() === "Report repository" ? lastChild.previousSibling : lastChild.nextSibling);
+	parentNode.insertBefore(createElement(new Date(api.created_at).toLocaleString(), iconCreate, "Creation date"), lastChild.textContent.trim() === "Report repository" ? lastChild.previousSibling : lastChild.nextSibling);
 	lastChild = document.querySelector("#repo-content-pjax-container > div > div > div.Layout.Layout--flowRow-until-md.react-repos-overview-margin.Layout--sidebarPosition-end.Layout--sidebarPosition-flowRow-end > div.Layout-sidebar > div > div:nth-child(1) > div > div > div:last-child");
-	parentNode.insertBefore(createElement(api.updated_at, iconUpdate, "Update date"), lastChild.textContent.trim() === "Report repository" ? lastChild.previousSibling : lastChild.nextSibling);
+	parentNode.insertBefore(createElement(new Date(api.updated_at).toLocaleString(), iconUpdate, "Update date"), lastChild.textContent.trim() === "Report repository" ? lastChild.previousSibling : lastChild.nextSibling);
 })();
